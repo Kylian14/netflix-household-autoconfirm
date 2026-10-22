@@ -114,7 +114,7 @@ Sur Gmail, `INBOX` inclut déjà les onglets Promotions et Mises à jour. N'util
 ## En détail
 
 - Toutes les 30 secondes, l'outil cherche dans le dossier les mails de « netflix » reçus depuis la veille. La boîte est ouverte **en lecture seule** (`BODY.PEEK`, aucun flag modifié).
-- Un mail est une demande de foyer s'il contient un lien vers `update-primary-location`. Le lien « modifier votre mot de passe » du même mail est ignoré.
+- Un mail est une demande de foyer s'il contient un lien `https://www.netflix.com` (ou `netflix.com`) vers `update-primary-location`. Les liens vers tout autre site ne sont jamais ouverts : un faux mail « Netflix » ne peut pas envoyer le navigateur ailleurs. Le lien « modifier votre mot de passe » du même mail est ignoré.
 - Les mails de plus de **15 minutes** sont ignorés : le lien a expiré.
 - Le lien est ouvert dans Chromium headless. L'outil clique le bouton « Confirmer la mise à jour », « Confirm update » ou son équivalent espagnol, allemand, italien ou portugais. En secours, il clique l'unique bouton d'envoi de la page, mais jamais sur une page de connexion.
 - Un essai raté est retenté au cycle suivant, **3 fois au maximum** par mail, et une capture de la page est enregistrée dans `screenshots/`.
@@ -123,6 +123,8 @@ Sur Gmail, `INBOX` inclut déjà les onglets Promotions et Mises à jour. N'util
 ## Confidentialité et sécurité
 
 - L'outil ne fait que lire. Il n'a besoin ni d'un accès en écriture à ta boîte, ni de tes identifiants Netflix.
+- Le navigateur n'ouvre que des liens `https://` sur `netflix.com`, quoi que prétende le mail.
+- Le mot de passe d'application donne un accès complet à cette boîte. Pour la configuration la plus sûre, transfère uniquement les mails Netflix vers une boîte dédiée et fais-la surveiller par l'outil. Tu peux révoquer le mot de passe d'application à tout moment.
 - Le jeton de connexion du lien n'apparaît jamais dans les logs. Chaque mail y figure sous forme d'un hash de 12 caractères.
 - Les erreurs sont loguées par type d'exception uniquement. Les erreurs IMAP affichent aussi la réponse du serveur (ex. `AUTHENTICATIONFAILED`), qui ne contient ni ton mot de passe ni le lien.
 - Les captures d'écran peuvent montrer ta page de compte Netflix. Elles restent dans `screenshots/` sur ta machine, ignoré par git.

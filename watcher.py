@@ -13,11 +13,13 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
 from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from playwright.sync_api import Error as PlaywrightError, sync_playwright
 
 log = logging.getLogger(__name__)
 LINK_MARKER = "update-primary-location"
+NETFLIX_HOSTS = frozenset({"www.netflix.com", "netflix.com"})
 MAX_AGE = timedelta(minutes=15)
 MAX_ATTEMPTS = 3
 POLL_SECONDS = 30
@@ -50,11 +52,19 @@ class _HrefCollector(HTMLParser):
                 self.hrefs.append(value)
 
 
+def _is_household_link(href: str) -> bool:
+    # Anyone can send a mail whose sender name says "Netflix": only follow
+    # https links to Netflix itself, never another host, localhost or file://.
+    parts = urlsplit(href)
+    return (parts.scheme == "https" and parts.hostname in NETFLIX_HOSTS
+            and LINK_MARKER in parts.path)
+
+
 def extract_link(html: str) -> str | None:
     collector = _HrefCollector()
     collector.feed(html)
     collector.close()
-    return next((href for href in collector.hrefs if LINK_MARKER in href), None)
+    return next((href for href in collector.hrefs if _is_household_link(href)), None)
 
 
 @dataclass(frozen=True)

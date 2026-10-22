@@ -33,6 +33,25 @@ def test_extract_link_none_on_empty():
     assert extract_link("") is None
 
 
+@pytest.mark.parametrize("href", [
+    "https://evil.example/account/update-primary-location?nftoken=x",
+    "https://www.netflix.com.evil.example/account/update-primary-location",
+    "https://evil.example/?next=https://www.netflix.com/account/update-primary-location",
+    "http://www.netflix.com/account/update-primary-location",
+    "http://localhost:8080/update-primary-location",
+    "file:///etc/update-primary-location",
+])
+def test_extract_link_rejects_links_outside_netflix(href):
+    assert extract_link(f'<a href="{href}">Oui</a>') is None
+
+
+def test_extract_link_skips_spoofed_link_before_real_one():
+    real = "https://netflix.com/account/update-primary-location?nftoken=x"
+    html = (f'<a href="https://evil.example/update-primary-location">a</a>'
+            f'<a href="{real}">b</a>')
+    assert extract_link(html) == real
+
+
 MAIL_DATE = datetime(2026, 10, 22, 10, 0, tzinfo=timezone.utc)
 CLEAN_LINK = ("https://www.netflix.com/account/update-primary-location"
               "?nftoken=FAKE&g=abc&lkid=UPDATE_HOUSEHOLD_REQUESTED_OTP_CTA")

@@ -114,7 +114,7 @@ On Gmail, `INBOX` already includes the Promotions and Updates tabs. Use `[Gmail]
 ## Details
 
 - Every 30 seconds the tool searches the folder for emails from "netflix" received since yesterday, with the mailbox opened **read-only** (`BODY.PEEK`, no flags changed).
-- An email is a household request if it contains a link to `update-primary-location`. The "change your password" link in the same email is ignored.
+- An email is a household request if it contains an `https://www.netflix.com` (or `netflix.com`) link to `update-primary-location`. Links to any other host are never opened, so a fake "Netflix" email cannot send the browser elsewhere. The "change your password" link in the same email is ignored.
 - Emails older than **15 minutes** are skipped: the link has expired.
 - The link is opened in headless Chromium. The tool clicks the button labelled "Confirmer la mise à jour", "Confirm update", or the Spanish, German, Italian or Portuguese equivalent. As a fallback it clicks the page's only submit button, but never on a login page.
 - A failed attempt is retried on the next poll, **up to 3 times** per email, and a screenshot of the page is saved to `screenshots/`.
@@ -123,6 +123,8 @@ On Gmail, `INBOX` already includes the Promotions and Updates tabs. Use `[Gmail]
 ## Privacy and security
 
 - The tool only reads. It needs no write access to your mailbox and no Netflix credentials.
+- The browser only ever opens `https://` links on `netflix.com`, whatever the email claims to be.
+- The app password grants full access to that mailbox. For the tightest setup, forward only Netflix emails to a dedicated mailbox and point the tool at it. You can revoke the app password at any time.
 - The login token in the email link never reaches the logs. Each email appears as a 12-character hash.
 - Errors are logged by exception type only. IMAP errors also show the server's reply (e.g. `AUTHENTICATIONFAILED`), which contains neither your password nor the link.
 - Screenshots may show your Netflix account page. They stay in `screenshots/` on your machine, which git ignores.
